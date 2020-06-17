@@ -100,11 +100,10 @@ d3.json("https://test.publicdatalab.org/wp-json/wp/v2/projects")
   // Creo i link della rete. "g" è il corrispettivo del gruppo di illustrator
   const link = svg.append("g")
   .attr("stroke", "#666")
-  .attr("stroke-width", 0.2)
+  .attr("stroke-width", 0.5)
   .selectAll("line") // L'ordine di selectAll, data, join è un po' una magia di d3 che va imparata a memoria. C'è una spiegazione ma sinceramente non l'ho mai capita
   .data(edges) // Questa è la funzione di "data binding", ovvero quando a delle forme in SVG gli associamo dei dati da un csv, da un json etc
-  .join("line")
-  .attr("stroke-width", 1);
+  .join("line");
 
   // Creo i nodi della rete in un altro gruppo
   const node = svg.append("g")

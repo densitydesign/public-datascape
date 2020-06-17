@@ -9,13 +9,13 @@ let height = 600;
 
 // Colore dei nodi - È una scala ordinale, ovvero discreta e che fa riferimento ai valori dentro al campo "type"
 const color = d3.scaleOrdinal()
-.range(["#F9F9F9", "#EBFF00"])
-.domain(["affiliation", "project"]);
+.range(["#DDDDDD", "#EBFF00", "#333333"])
+.domain(["affiliation", "project", "people"]);
 
 // Dimensione dei nodi - È una scala ordinale, ovvero discreta e che fa riferimento ai valori dentro al campo "type"
 const size = d3.scaleOrdinal()
-.range([4, 10])
-.domain(["affiliation", "project"]);
+.range([6, 16, 36])
+.domain(["people", "affiliation", "project"]);
 
 // In questa funzione vengono caricati i dati, nel caso di Wordpress abbiamo un JSON
 d3.json("https://test.publicdatalab.org/wp-json/wp/v2/projects")
@@ -50,16 +50,48 @@ d3.json("https://test.publicdatalab.org/wp-json/wp/v2/projects")
         target: e
       })
     })
+
+    d.acf.coordinators.forEach(f => {
+      console.log(f)
+      nodes.push({
+        id: f.ID,
+        name: f.post_title,
+        type: "people"
+      })
+
+      edges.push({
+        source: d.id,
+        target: f.ID
+      })
+    })
+
+    // let collaborators = d.acf.collaborators.filter(d => d != "false");
+
+    if (d.acf.collaborators) {
+      d.acf.collaborators.forEach(f => {
+        console.log(f)
+        nodes.push({
+          id: f.ID,
+          name: f.post_title,
+          type: "people"
+        })
+
+        edges.push({
+          source: d.id,
+          target: f.ID
+        })
+      })
+    }
   })
 
   console.log(nodes, edges);
 
   // Creazione delle forze che gestiscono la posizione dei nodi nello spazio
   const simulation = d3.forceSimulation(nodes)
-  .force("link", d3.forceLink(edges).id(d => d.id)) // Specifico quali sono le connessioni
-  .force("charge", d3.forceManyBody()) // Creo la forza di attrazione tra i nodi
+  .force("link", d3.forceLink(edges).id(d => d.id).distance(50)) // Specifico quali sono le connessioni
+  .force("charge", d3.forceManyBody().strength(-50)) // Creo la forza di attrazione tra i nodi
   .force("center", d3.forceCenter(width / 2, height / 2)) // Specificoil centro della forza
-  .force("collide", d3.forceCollide(5)); // Creo la forza di repulsione che fa sì che i nodi non si sovrappongano
+  .force("collide", d3.forceCollide(d => size(d.type) + 2)); // Creo la forza di repulsione che fa sì che i nodi non si sovrappongano
 
   // Creo un SVG in cui inserire la visualizzazione
   const svg = d3.select("svg")
@@ -67,8 +99,8 @@ d3.json("https://test.publicdatalab.org/wp-json/wp/v2/projects")
 
   // Creo i link della rete. "g" è il corrispettivo del gruppo di illustrator
   const link = svg.append("g")
-  .attr("stroke", "#999")
-  .attr("stroke-opacity", 0.6)
+  .attr("stroke", "#666")
+  .attr("stroke-width", 0.2)
   .selectAll("line") // L'ordine di selectAll, data, join è un po' una magia di d3 che va imparata a memoria. C'è una spiegazione ma sinceramente non l'ho mai capita
   .data(edges) // Questa è la funzione di "data binding", ovvero quando a delle forme in SVG gli associamo dei dati da un csv, da un json etc
   .join("line")
@@ -76,8 +108,6 @@ d3.json("https://test.publicdatalab.org/wp-json/wp/v2/projects")
 
   // Creo i nodi della rete in un altro gruppo
   const node = svg.append("g")
-  .attr("stroke", "#999")
-  .attr("stroke-width", 1)
   .selectAll("circle")
   .data(nodes)
   .join("circle")

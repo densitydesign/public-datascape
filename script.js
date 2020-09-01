@@ -108,11 +108,12 @@ d3.json("https://test.publicdatalab.org/wp-json/wp/v2/projects?_embed=1")
 
   const simulation = d3.forceSimulation(nodes)
   .force("link", d3.forceLink(edges).id(d => d.id).distance(40)) // Specifico quali sono le connessioni
-  .force("charge", d3.forceManyBody().strength(-100))
+  .force("charge", d3.forceManyBody().strength(3))
   //.force("x", d3.forceX(d => x(d.type)))
   //.force("y", d3.forceY(height / 2))
   .force("center", d3.forceCenter(width / 2, height / 2)) // Specificoil centro della forza
-  .force("collide", d3.forceCollide(d => size(d.degree)+1)); // Creo la forza di repulsione che fa sì che i nodi non si sovrappongano
+  .force("collide", d3.forceCollide(d => size(d.degree)+1).iterations(5))
+  .alpha(1); // Creo la forza di repulsione che fa sì che i nodi non si sovrappongano
 
   const svg = d3.select("svg")
   .attr("width", width)
